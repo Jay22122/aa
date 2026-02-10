@@ -3,7 +3,7 @@ from flask import Flask
 
 app = Flask(__name__)
 
-# 파이썬 문법 오류 방지를 위해 f-string 대신 일반 문자열을 사용하고 스타일을 정비했습니다.
+# 파이썬 문법 충돌을 피하기 위해 CSS와 JS의 중괄호 및 기호를 안전하게 처리한 버전입니다.
 html_content = """
 <!DOCTYPE html>
 <html lang="ko">
@@ -16,7 +16,6 @@ html_content = """
         textarea { width: 95%; height: 100px; border: 1px solid #000; padding: 10px; margin-bottom: 10px; font-size: 12px; }
         button { padding: 10px 25px; background: #000; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
         
-        /* 레이아웃 정밀 재설정 */
         .board-container { position: relative; margin-top: 60px; width: 840px; height: 240px; }
         .square-grid { display: grid; grid-template-columns: repeat(7, 120px); grid-template-rows: repeat(2, 120px); border: 2.5px solid #000; background: #fff; position: absolute; top: 0; left: 0; z-index: 1; }
         .square { border: 1px solid #000; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; text-align: center; height: 120px; box-sizing: border-box; background: #fff; }
@@ -60,19 +59,23 @@ html_content = """
             if (num >= MAX_CAPACITY * 0.8) return 'high-stock';
             return '';
         }
+
         const squares = ['A201','A202','A203','A204','A205','A206','A207','A401','A402','A403','A404','A405','A406','A407'];
         const rounds = [['A101','A102','A103','A104','A105','A106'],['A301','A302','A303','A304','A305','A306'],['A501','A502','A503','A504','A505','A506']];
         
+        const gridDiv = document.getElementById('grid');
         squares.forEach(id => { 
-            document.getElementById('grid').innerHTML += `<div class="square" id="tank-${id}"><div class="title" id="title-${id}">-</div><div class="val" id="val-${id}">-</div><div class="tank-id">${id}</div></div>`; 
+            gridDiv.innerHTML += '<div class="square" id="tank-' + id + '"><div class="title" id="title-' + id + '">-</div><div class="val" id="val-' + id + '">-</div><div class="tank-id">' + id + '</div></div>'; 
         });
         
+        const lineDiv = document.getElementById('lines');
+        const overlayDiv = document.getElementById('overlay');
         for(let col=1; col<=6; col++) {
             const x = col * 120;
-            document.getElementById('lines').innerHTML += `<div class="v-line" style="left:\${x}px;"></div>`;
+            lineDiv.innerHTML += '<div class="v-line" style="left:' + x + 'px;"></div>';
             for(let row=0; row<3; row++) {
                 const id = rounds[row][col-1];
-                document.getElementById('overlay').innerHTML += `<div class="round" id="tank-${id}" style="left:\${x}px; top:\${row*120}px;"><div class="title" id="title-${id}">-</div><div class="val" id="val-${id}">-</div><div class="tank-id">${id}</div></div>`;
+                overlayDiv.innerHTML += '<div class="round" id="tank-' + id + '" style="left:' + x + 'px; top:' + (row*120) + 'px;"><div class="title" id="title-' + id + '">-</div><div class="val" id="val-' + id + '">-</div><div class="tank-id">' + id + '</div></div>';
             }
         }
 
@@ -82,10 +85,10 @@ html_content = """
                 const cols = row.split(/[\\t\\s]+/).filter(s => s.trim() !== "");
                 if (cols.length >= 3) {
                     const tankId = cols[0].toUpperCase().trim();
-                    const box = document.getElementById(\`tank-\${tankId}\`);
+                    const box = document.getElementById('tank-' + tankId);
                     if (box) {
-                        document.getElementById(\`title-\${tankId}\`).innerText = cols[1];
-                        document.getElementById(\`val-\${tankId}\`).innerText = cols[2];
+                        document.getElementById('title-' + tankId).innerText = cols[1];
+                        document.getElementById('val-' + tankId).innerText = cols[2];
                         box.classList.remove('low-stock', 'high-stock');
                         const sc = getStockClass(cols[2]);
                         if(sc) box.classList.add(sc);
